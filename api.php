@@ -1,6 +1,6 @@
 <?php
 /**
- * Proxy script to communicate cross-site with a CouchDB Server via PHP
+ * Proxy script to communicate cross-domain with a CouchDB Server via PHP
  */
 
 // Config file containing all constants used below must be included
@@ -23,13 +23,13 @@ if (isset($_SESSION['logged']) === FALSE) {
 
 // Build request and send it to the CouchDB Server
 if (isset($_SESSION['logged']) && $_SESSION['logged'] === TRUE) {
-	$url = 'https://'.COUCH_USER.':'.COUCH_PASS.'@'.COUCH_DOMAIN.'/'.COUCH_DATABASE.'/';
+	$url = COUCH_PROTOCOL.'://'.COUCH_USER.':'.COUCH_PASS.'@'.COUCH_DOMAIN.'/'.COUCH_DATABASE.'/';
 	$method = $_SERVER['REQUEST_METHOD'];
 	$content = ${"_$method"};
 
-	$returned_content = exec_request($url, $method, $content);
+	$response = exec_request($url, $method, $content);
 	
-	echo $returned_content;
+	echo $response;
 }
 
 
@@ -60,18 +60,18 @@ function exec_request($url, $method, $content) {
 
 function disable_magic_quotes() {
 	if (get_magic_quotes_gpc()) {
-    		$process = array(&$_GET, &$_POST, &$_COOKIE, &$_REQUEST);
-	    while (list($key, $val) = each($process)) {
-	        foreach ($val as $k => $v) {
-	            unset($process[$key][$k]);
-	            if (is_array($v)) {
-	                $process[$key][stripslashes($k)] = $v;
-	                $process[] = &$process[$key][stripslashes($k)];
-	            } else {
-	                $process[$key][stripslashes($k)] = stripslashes($v);
-	            }
-	        }
-	    }
-	    unset($process);
+	    	$process = array(&$_GET, &$_POST, &$_COOKIE, &$_REQUEST);
+		while (list($key, $val) = each($process)) {
+			foreach ($val as $k => $v) {
+			    unset($process[$key][$k]);
+			    if (is_array($v)) {
+				$process[$key][stripslashes($k)] = $v;
+				$process[] = &$process[$key][stripslashes($k)];
+			    } else {
+			        $process[$key][stripslashes($k)] = stripslashes($v);
+			    }
+			}
+		}
+		unset($process);
 	}
 }
